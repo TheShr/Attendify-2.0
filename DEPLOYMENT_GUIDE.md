@@ -36,6 +36,31 @@ Expected response:
 {"status":"ok","service":"attendify-backend"}
 ```
 
+## FaceNet Microservice (Render Docker)
+
+### 1. Create a new Render Web Service
+- Service type: `Docker`
+- Repository: your Attendify repository
+- Dockerfile path: `facenet_service/Dockerfile`
+- Build context: `facenet_service`
+
+### 2. Set environment variables
+- `MATCH_THRESHOLD` (optional, default `0.55`)
+- `EMBEDDINGS_PATH` (optional, e.g. `/opt/render/project/src/data/embeddings.pkl`)
+- `PORT=5001`
+
+### 3. Render service settings
+- Port: `5001`
+- Health check path: `/health`
+- Start command: no start command needed because Dockerfile handles it
+
+### 4. Verify deployment
+Open the Render service URL and call:
+```bash
+curl https://<your-render-facenet-url>/health
+```
+Expected response should include `"ok": true` and `"deepface"`, `"opencv"`, `"enrolled_students"` values.
+
 ## Frontend (Vercel)
 
 ### 1. Create a new Vercel project
