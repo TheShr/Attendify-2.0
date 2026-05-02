@@ -1,0 +1,52 @@
+services:
+  # ── Flask backend ────────────────────────────────────────────
+  - type: web
+    name: attendify-backend
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: attendify-db
+          property: connectionString
+      - key: REDIS_URL
+        value: ""
+      - key: FLASK_ENV
+        value: production
+      - key: FACE_SERVICE_URL
+        value: https://attendify-facenet.onrender.com
+      - key: CORS_ORIGINS
+        value: https://your-app.vercel.app
+      - key: GEOFENCE_RADIUS_METERS
+        value: "100"
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+
+  # ── FaceNet microservice ─────────────────────────────────────
+  - type: web
+    name: attendify-facenet
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn facenet_service:app --bind 0.0.0.0:$PORT --workers 1 --timeout 60
+    disk:
+      name: embeddings-disk
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
+    envVars:
+      - key: EMBEDDINGS_PATH
+        value: /opt/render/project/src/data/embeddings.pkl
+      - key: MATCH_THRESHOLD
+        value: "0.55"
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+
+databases:
+  - name: attendify-db
+    databaseName: attendify_db
+    user: attendify_user
+    plan: free

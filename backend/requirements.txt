@@ -1,0 +1,15 @@
+flask==3.0.3
+flask-sqlalchemy==3.1.1
+flask-jwt-extended==4.6.0
+flask-cors==4.0.1
+psycopg2-binary==2.9.9
+sqlalchemy==2.0.31
+werkzeug==3.0.3
+python-dotenv==1.0.1
+requests==2.32.3
+gunicorn==22.0.0
+redis==5.8.0
+rq==1.15.2
+Flask-Limiter==2.7.0
+Flask-Session==0.4.0
+Flask-Compress==1.14.0
