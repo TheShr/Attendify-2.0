@@ -21,7 +21,7 @@ def process_face_enrollment(student_id: str, images: list[tuple[bytes, str]]):
 
 
 def enqueue_face_enrollment(student_id: str, images: list[tuple[bytes, str]]):
-    from queue import job_queue
+    from job_queue import job_queue
 
     job = job_queue.enqueue(process_face_enrollment, student_id, images)
     return job.id

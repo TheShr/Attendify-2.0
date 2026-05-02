@@ -1,5 +1,5 @@
 from app import create_app
-from queue import job_queue
+from job_queue import job_queue
 from redis_client import redis_client
 from rq import Worker, Connection
 
