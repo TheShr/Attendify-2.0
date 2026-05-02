@@ -4,6 +4,7 @@ import time
 from flask import Flask, jsonify, request
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
+from werkzeug.exceptions import HTTPException
 from config import Config
 from extensions import db, limiter, session_store, compress
 from redis_client import redis_client
@@ -56,6 +57,8 @@ def create_app():
 
     @app.errorhandler(Exception)
     def handle_exception(error):
+        if isinstance(error, HTTPException):
+            return error
         app.logger.exception("Unhandled request exception")
         return jsonify({"error": "internal_server_error"}), 500
 
