@@ -9,6 +9,20 @@ function buildBackendUrl(path: string): URL {
   return new URL(`${cleanBase}${suffix}`)
 }
 
+async function parseBackendResponse(response: Response) {
+  const text = await response.text()
+  try {
+    return JSON.parse(text)
+  } catch {
+    return {
+      error: "backend_response_not_json",
+      status: response.status,
+      statusText: response.statusText,
+      body: text,
+    }
+  }
+}
+
 export async function POST(
   req: NextRequest,
   { params }: { params: { route: string[] } }
@@ -60,7 +74,7 @@ export async function POST(
       body: JSON.stringify(body),
     })
 
-    const data = await response.json()
+    const data = await parseBackendResponse(response)
     return NextResponse.json(data, { status: response.status })
   } catch (error) {
     console.error("Auth proxy error:", error)
@@ -91,7 +105,7 @@ export async function GET(
       headers,
     })
 
-    const data = await response.json()
+    const data = await parseBackendResponse(response)
     return NextResponse.json(data, { status: response.status })
   } catch (error) {
     console.error("Auth proxy error:", error)
