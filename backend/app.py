@@ -24,6 +24,9 @@ def create_app():
     app.config["SESSION_TYPE"] = "redis"
     app.config["SESSION_PERMANENT"] = False
     app.config["SESSION_USE_SIGNER"] = True
+    # Flask-Session 0.4.0 is not fully compatible with Flask 3.x.
+    # Add the legacy attribute it still expects.
+    app.session_cookie_name = app.config.get("SESSION_COOKIE_NAME", "session")
 
     logging.basicConfig(
         level=logging.INFO,
