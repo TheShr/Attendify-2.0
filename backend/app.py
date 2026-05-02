@@ -68,7 +68,7 @@ def create_app():
     # ── Blueprints ────────────────────────────────────────────
     from auth_routes import auth_bp
     from attendance_routes import attendance_bp
-    from teacher_routes import teacher_bp
+    from teacher_routes import create_class, list_classes, teacher_bp
     from student_routes import student_bp
     from geofence_routes import geofence_bp
     from admin_routes import admin_bp
@@ -79,6 +79,12 @@ def create_app():
     app.register_blueprint(student_bp,     url_prefix="/api/student")
     app.register_blueprint(geofence_bp,    url_prefix="/api/geofences")
     app.register_blueprint(admin_bp,       url_prefix="/api/admin")
+
+    @app.route("/api/classes", methods=["GET", "POST"])
+    def classes_alias():
+        if request.method == "POST":
+            return create_class()
+        return list_classes()
 
     # ── Health check ──────────────────────────────────────────
     @app.route("/api/health")
