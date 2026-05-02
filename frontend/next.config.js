@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // The frontend uses Next.js API routes to proxy requests to the backend.
-  // In production on Vercel, the backend host is supplied through
-  // NEXT_PUBLIC_API_URL and the proxy routes build the full backend URL.
+  // The frontend uses NEXT_PUBLIC_BACKEND_URL to call the backend directly.
+  // In production on Vercel, the backend host should be configured as
+  // NEXT_PUBLIC_BACKEND_URL, with legacy support for NEXT_PUBLIC_API_URL.
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "**" },

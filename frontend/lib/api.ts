@@ -3,23 +3,26 @@
  *
  * All fetch calls go through here so:
  *  - JWT token is always injected from localStorage
- *  - Backend host comes from NEXT_PUBLIC_API_URL env var (Vercel/Render)
- *  - Local development falls back to http://localhost:5000/api
+ *  - Backend host comes from NEXT_PUBLIC_BACKEND_URL env var (Vercel/Render)
+ *  - Local development falls back to http://localhost:5000
  *  - 401 responses auto-redirect to login
  */
 
-const DEFAULT_API_BASE = "http://localhost:5000/api";
+const DEFAULT_API_BASE = "http://localhost:5000";
+const BACKEND_ENV =
+  (typeof process !== "undefined" &&
+    (process.env?.NEXT_PUBLIC_BACKEND_URL || process.env?.NEXT_PUBLIC_API_URL)) ||
+  "";
 
 export function getApiBase(): string {
-  const candidate =
-    (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_API_URL) || "";
+  const candidate = BACKEND_ENV || "";
   if (candidate.trim().length > 0) {
     return candidate.trim().replace(/\/+$/, "");
   }
 
   if (process.env.NODE_ENV === "production") {
     throw new Error(
-      "NEXT_PUBLIC_API_URL is not configured in production. Set it in Vercel environment variables."
+      "NEXT_PUBLIC_BACKEND_URL is not configured in production. Set it in Vercel environment variables."
     );
   }
 
@@ -27,22 +30,15 @@ export function getApiBase(): string {
 }
 
 export function resolveApiUrl(path: string): string {
-  if (path.startsWith("/api/")) {
-    // Route same-origin application API requests through Next.js.
-    // This avoids CORS issues in local development and keeps browser
-    // requests on the frontend origin.
-    return path
+  if (/^https?:\/\//i.test(path)) return path;
+
+  const base = getApiBase();
+  const relative = path.startsWith("/") ? path : `/${path}`;
+  if (relative.startsWith("/api/") && base.endsWith("/api")) {
+    return `${base}${relative.slice(4)}`;
   }
 
-  const base = getApiBase()
-  if (/^https?:\/\//i.test(path)) return path
-  const relative = path.startsWith("/") ? path : `/${path}`
-  // If base already ends with /api and path starts with /api/, de-dup
-  const trimmedBase = base.replace(/\/+$/, "")
-  if (trimmedBase.endsWith("/api") && relative.startsWith("/api/")) {
-    return `${trimmedBase}${relative.slice(4)}`
-  }
-  return `${trimmedBase}${relative}`
+  return `${base}${relative}`;
 }
 
 function getToken(): string | null {
@@ -62,6 +58,10 @@ export async function apiFetch(path: string, init?: RequestInit & { timeoutMs?: 
   const url = resolveApiUrl(path);
   const timeoutMs = init?.timeoutMs ?? 15000;
 
+  if (process.env.NODE_ENV !== "production") {
+    console.debug("[apiFetch] url:", url, "method:", init?.method || "GET");
+  }
+
   // Don't add Content-Type for FormData — browser sets it with boundary
   const isFormData = init?.body instanceof FormData;
   const controller = new AbortController();
@@ -77,6 +77,10 @@ export async function apiFetch(path: string, init?: RequestInit & { timeoutMs?: 
     });
   } finally {
     globalThis.clearTimeout(timer);
+  }
+
+  if (process.env.NODE_ENV !== "production") {
+    console.debug("[apiFetch] status:", response.status, "url:", url);
   }
 
   // Auto-logout on 401

@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Camera, CameraOff, Users, AlertCircle, Wifi } from "lucide-react"
-import { apiJson } from "@/lib/api"
+import { apiFetch, apiJson } from "@/lib/api"
 
 export interface AttendanceMarkResult {
   matched: boolean
@@ -231,7 +231,7 @@ export function CameraFeed({
           headers["Authorization"] = `Bearer ${token}`
         }
 
-        const response = await fetch("/api/attendance/mark-face", {
+        const response = await apiFetch("/api/attendance/mark-face", {
           method: "POST",
           headers,
           body: formData,
