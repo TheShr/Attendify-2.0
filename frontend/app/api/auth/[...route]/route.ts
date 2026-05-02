@@ -2,8 +2,14 @@ import { NextRequest, NextResponse } from "next/server"
 import { getApiBase } from "@/lib/api"
 
 function buildBackendUrl(path: string): URL {
-  const base = getApiBase().replace(/\/+$/, "")
-  // Remove /api if it's at the end of base, then add the full path
+  const base = getApiBase().replace(/\/+$/, "")  if (
+    process.env.NODE_ENV === "production" &&
+    base === "http://localhost:5000/api"
+  ) {
+    throw new Error(
+      "NEXT_PUBLIC_API_URL is not configured in production. Set your backend host in Vercel."
+    )
+  }  // Remove /api if it's at the end of base, then add the full path
   const cleanBase = base.endsWith("/api") ? base : `${base}/api`
   const suffix = path.startsWith("/") ? path : `/${path}`
   return new URL(`${cleanBase}${suffix}`)
@@ -68,11 +74,23 @@ export async function POST(
     const authHeader = req.headers.get("authorization")
     if (authHeader) headers["Authorization"] = authHeader
 
-    const response = await fetch(backendUrl.toString(), {
-      method: "POST",
-      headers,
-      body: JSON.stringify(body),
-    })
+    let response: Response
+    try {
+      response = await fetch(backendUrl.toString(), {
+        method: "POST",
+        headers,
+        body: JSON.stringify(body),
+      })
+    } catch (fetchError) {
+      console.error("Auth proxy fetch error:", fetchError)
+      return NextResponse.json(
+        {
+          error: "backend_unavailable",
+          details: String(fetchError),
+        },
+        { status: 502 }
+      )
+    }
 
     const data = await parseBackendResponse(response)
     return NextResponse.json(data, { status: response.status })
@@ -100,10 +118,22 @@ export async function GET(
     const backendUrl = buildBackendUrl(backendPath)
     console.log(`[Auth Proxy] GET ${backendPath} -> ${backendUrl}`)
 
-    const response = await fetch(backendUrl.toString(), {
-      method: "GET",
-      headers,
-    })
+    let response: Response
+    try {
+      response = await fetch(backendUrl.toString(), {
+        method: "GET",
+        headers,
+      })
+    } catch (fetchError) {
+      console.error("Auth proxy fetch error:", fetchError)
+      return NextResponse.json(
+        {
+          error: "backend_unavailable",
+          details: String(fetchError),
+        },
+        { status: 502 }
+      )
+    }
 
     const data = await parseBackendResponse(response)
     return NextResponse.json(data, { status: response.status })

@@ -16,6 +16,13 @@ export function getApiBase(): string {
   if (candidate.trim().length > 0) {
     return candidate.trim().replace(/\/+$/, "");
   }
+
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "NEXT_PUBLIC_API_URL is not configured in production. Set it in Vercel environment variables."
+    );
+  }
+
   return DEFAULT_API_BASE;
 }
 
