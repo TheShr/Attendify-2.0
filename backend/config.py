@@ -6,7 +6,7 @@ load_dotenv()
 
 def _env(key: str, default: str | None = None, required_in_production: bool = False) -> str:
     value = os.getenv(key)
-    if value is None:
+    if value is None or value.strip() == "":
         if required_in_production and os.getenv("FLASK_ENV", "development").lower() == "production":
             raise RuntimeError(f"{key} must be set in production")
         return default or ""
@@ -62,6 +62,6 @@ class Config:
     # Comma-separated list of allowed origins
     CORS_ORIGINS = [
         o.strip()
-        for o in os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",")
+        for o in _env("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",")
         if o.strip()
     ]

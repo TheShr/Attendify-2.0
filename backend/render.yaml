@@ -21,7 +21,7 @@ services:
       - key: FACE_SERVICE_URL
         value: https://attendify-facenet.onrender.com
       - key: CORS_ORIGINS
-        value: https://your-app.vercel.app
+        value: https://attendify-pej8f95ft-anujsharma214692-gmailcoms-projects.vercel.app
       - key: GEOFENCE_RADIUS_METERS
         value: "100"
       - key: PYTHON_VERSION
