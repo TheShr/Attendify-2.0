@@ -8,7 +8,7 @@ Render can deploy the backend from this repository using Docker.
 - Service type: `Docker`
 - Repository: your Attendify repository
 - Dockerfile path: `backend/Dockerfile`
-- Build context: `/` or root directory
+- Build context: `backend`
 
 ### 2. Set environment variables
 Required values:
