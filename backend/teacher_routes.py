@@ -96,7 +96,8 @@ def create_class():
     db.session.commit()
     invalidate_cache("list_courses")
     invalidate_cache("list_classes")
-    return jsonify({"message": "class added", "class": course.to_dict()}), 201
+    class_data = course.to_dict()
+    return jsonify({"ok": True, "message": "class added", "class": class_data, "data": class_data}), 201
 
 
 @teacher_bp.route("/course/add", methods=["POST"])
@@ -247,7 +248,7 @@ def list_classes():
         }
         for c in courses
     ]
-    return jsonify({"classes": response})
+    return jsonify({"ok": True, "data": response, "classes": response})
 
 
 
